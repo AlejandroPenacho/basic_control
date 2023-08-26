@@ -7,6 +7,9 @@
     let my_num = 1;
     let nyquist_values;
 
+    let side_gone = 0;
+    let diff_equation;
+
     $: {
         let poles = [ math.complex(-my_num), math.complex(-2)];
 
@@ -22,9 +25,37 @@
             )
             return math.divide(math.complex(1), a)
         });
+
+        diff_equation = (x) => my_num * (1 - x )
     }
 
     let canvas;
+    let second_canvas;
+
+    let t_array = Array.from({length: 10000}, (e, i) => i/1000)
+    let y_array = Array.from(10000)
+
+    function update_trajectory() {
+        let dt = 0.01;
+        y_array[0] = 0;
+        let state = [0, 0];
+        for (let i = 1; i < 10000; i++) {
+            state[0] = state[0] + state[1] * dt;
+            state[1] = state[1] + my_num * 2 * (1 - state[1]) - 4 * state[0];
+            y_array[i] = state[0];
+        }
+        let ctx = second_canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        for (let i=1; i < nyquist_values.length; i++) {
+            ctx.lineTo(1000*t_array[i], -200*(y_array[i]) + 250);
+        }
+        ctx.stroke();
+        ctx.beginPath;
+        ctx.moveTo(0, 50)
+        ctx.lineTo(500, 50)
+        ctx.stroke();
+    }
 
     function draw_nyquist() {
         let ctx = canvas.getContext("2d");
@@ -43,14 +74,18 @@
 
     function update_canvas() {
         draw_nyquist();
+        update_trajectory();
     }
 
     
 </script>
 
 <style>
-    canvas#myCanvas {
+    div#myCanvas {
         border: 1mm solid #000000;
+        width: 500px;
+        height: 500px;
+        overflow: hidden;
     }
 </style>
 
@@ -73,9 +108,35 @@ Hail the pole:
     min="0.1"
     max="10"
 />
+<br>
+<input
+    type="range"
+    bind:value={side_gone}
+    step="0.05"
+    min="-10"
+    max="10"
+/>
 
 <br>
 And the {nyquist_values[4]}
 <br>
 
-<canvas bind:this={canvas} width={500} height={500} id="myCanvas"/>
+<div style="display: flex">
+    <div id="myCanvas">
+    <canvas
+        bind:this={canvas}
+        width={500}
+        height={500}
+        style="transform: translate({side_gone}cm)"
+    />
+    </div>
+
+    <div id="myCanvas">
+    <canvas
+        bind:this={second_canvas}
+        width={500}
+        height={500}
+        style="transform: translate({side_gone}cm)"
+    />
+    </div>
+</div>
