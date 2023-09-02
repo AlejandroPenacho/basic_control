@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import * as math from "mathjs";
+    import Graph from "./graph.svelte";
 
     let x = math.complex(3, 4);
 
@@ -30,7 +31,6 @@
         diff_equation = (x) => my_num * (1 - x )
     }
 
-    let canvas;
     let canvas_conf = {
         x_0: 0,
         y_0: 0,
@@ -59,7 +59,7 @@
             ctx.lineTo(1000*t_array[i], -200*(y_array[i]) + 250);
         }
         ctx.stroke();
-        ctx.beginPath;
+        ctx.beginPath();
         ctx.moveTo(0, 50)
         ctx.lineTo(500, 50)
         ctx.stroke();
@@ -90,7 +90,7 @@
     }
 
     onMount(() => {
-        draw_nyquist();
+        // draw_nyquist();
     })
 
     function update_canvas() {
@@ -193,22 +193,12 @@ And the {nyquist_values[4]}
 <div style="display: flex">
     <div id="myCanvas">
     <canvas
-        bind:this={canvas}
-        on:wheel={canvas_scroll}
-        on:mousedown={canvas_mouse_down}
-        on:mouseup={canvas_mouse_up}
-        on:mousemove={canvas_mouse_move}
-        width={500}
-        height={500}
-    />
-    </div>
-
-    <div id="myCanvas">
-    <canvas
         bind:this={second_canvas}
         width={500}
         height={500}
         style="transform: translate({side_gone}cm)"
     />
     </div>
+
+    <Graph/>
 </div>
