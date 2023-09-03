@@ -9,29 +9,62 @@
   // And receive:
   //    Something than handles clicks and moves and stuff
 
-  export let canvas;
-  export let canvas_parameters = {
-    x_c: 0,
-    y_c: 0,
-    x_range: 4,
-    y_range: 4
+  class CanvasParameters {
+    constructor() {
+      this.x_c = 0,
+      this.y_c = 0,
+      this.x_range = 4,
+      this.y_range = 4,
+      this.width = 500,
+      this.height = 500
+    }
+
+    value_to_position(value) {
+      let x_scale = this.width / this.x_range;
+      let y_scale = this.height / this.y_range;
+      let x_0 = this.width/2 + this.x_range * this.x_c;
+      let y_0 = this.height/2 + this.y_range * this.y_c;
+
+      return [
+        this.width/2 + x_scale * (value[0] - this.x_c),
+        this.height/2 - y_scale * (value[1] - this.y_c),
+      ]
+    }
+
+    position_to_value(position) {
+      let delta_x = (position[0]/this.width - 0.5) * this.x_range;
+      let delta_y = -(position[1]/this.height - 0.5) * this.y_range;
+
+      return [
+        delta_x + this.x_c,
+        delta_y + this.y_c
+      ]
+    }
   }
 
-  function value_to_position(value, canvas, parameters) {
-    let x_scale = canvas.width / parameters.x_range;
-    let y_scale = canvas.height / parameters.y_range;
-    let x_0 = canvas.width/2 + canvas_parameters.x_range * canvas_parameters.x_c;
-    let y_0 = canvas.height/2 + canvas_parameters.y_range * canvas_parameters.y_c;
+  export let canvas;
+  export let canvas_parameters = new CanvasParameters();
+
+  export let mouse_wheel_mid = function(e) { return false }
+  export let mouse_up_mid = function(e) { return false }
+  export let mouse_down_mid = function(e) { return false }
+  export let mouse_move_mid = function(e) { return false }
+
+  function value_to_position(value, parameters) {
+    let x_scale = parameters.width / parameters.x_range;
+    let y_scale = parameters.height / parameters.y_range;
+    let x_0 = parameters.width/2 + parameters.x_range * parameters.x_c;
+    let y_0 = parameters.height/2 + parameters.y_range * parameters.y_c;
 
     return [
-      canvas.width/2 + x_scale * (value[0] - parameters.x_c),
-      canvas.height/2 - y_scale * (value[1] - parameters.y_c),
+      parameters.width/2 + x_scale * (value[0] - parameters.x_c),
+      parameters.height/2 - y_scale * (value[1] - parameters.y_c),
     ]
   }
 
-  function position_to_value(position, canvas, parameters) {
-    let delta_x = (position[0]/canvas.width - 0.5) * parameters.x_range;
-    let delta_y = -(position[1]/canvas.height - 0.5) * parameters.y_range;
+  function position_to_value(position, parameters) {
+    let delta_x = (position[0]/parameters.width - 0.5) * parameters.x_range;
+    let delta_y = -(position[1]/parameters.height - 0.5) * parameters.y_range;
 
     return [
       delta_x + parameters.x_c,
@@ -55,16 +88,13 @@
       let ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
-      let initial_point = value_to_position(
-        test_points[0],
-        canvas,
-        canvas_parameters
+      let initial_point = canvas_parameters.value_to_position(
+        test_points[0]
       );
       ctx.moveTo(initial_point[0], initial_point[1]);
       for (let i=1; i< test_points.length; i++) {
         let norm_point = value_to_position(
           test_points[i],
-          canvas,
           canvas_parameters
         );
         ctx.lineTo(norm_point[0], norm_point[1]);
@@ -73,10 +103,6 @@
   }
 
 
-  export let mouse_wheel_mid = function(e) { return false }
-  export let mouse_up_mid = function(e) { return false }
-  export let mouse_down_mid = function(e) { return false }
-  export let mouse_move_mid = function(e) { return false }
 
   function mouse_wheel_event(e) {
       let skip_scroll = mouse_wheel_mid();
@@ -85,7 +111,7 @@
       e.preventDefault();
       let p_x = e.layerX;
       let p_y = e.layerY;
-      let m_value = position_to_value([p_x, p_y], canvas, canvas_parameters);
+      let m_value = canvas_parameters.position_to_value([p_x, p_y]);
 
       let scroll_factor = 0.8;
       let scale_ratio;
@@ -159,7 +185,7 @@
     on:blur={mouse_up_event}
     on:mouseup={mouse_up_event}
     on:mousemove={mouse_move_event}
-    width={500}
-    height={500}
+    width={canvas_parameters.width}
+    height={canvas_parameters.height}
 />
 </div>
