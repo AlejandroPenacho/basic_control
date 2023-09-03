@@ -9,14 +9,17 @@
   // And receive:
   //    Something than handles clicks and moves and stuff
 
+  export let width;
+  export let height;
+
   class Canvas {
     constructor() {
-      this.x_c = 0,
-      this.y_c = 0,
-      this.x_range = 4,
-      this.y_range = 4,
-      this.width = 500,
-      this.height = 500
+      this.x_c = 0;
+      this.y_c = 0;
+      this.x_range = 4;
+      this.y_range = 4;
+      this.width = width;
+      this.height = height;
       this.canvas = false;
 
       this.mouse_wheel_mid = function(e) { return false }
@@ -162,9 +165,6 @@
     canvas.draw();
   }
 
-  onMount(() => {
-    canvas.draw();
-  })
 </script>
 
 <style>
