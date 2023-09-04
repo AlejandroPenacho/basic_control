@@ -3,6 +3,7 @@
     import * as math from "mathjs";
     import Graph from "./graph.svelte";
     import Nyquist from "./nyquist.svelte";
+    import PZMap from "./pz_map.svelte";
 
     let my_num = 0;
     let side_gone = 0;
@@ -123,9 +124,6 @@
         if (bode_phase_canvas != undefined) {
             bode_phase_canvas.draw();
         }
-        if (pz_canvas != undefined) {
-            pz_canvas.draw();
-        }
     }
 
     let bode_mag_canvas;
@@ -144,8 +142,6 @@
         bode_phase_canvas.y_c = 0;
         bode_phase_canvas.y_range = 360;
 
-        pz_canvas.x_range = 6;
-        pz_canvas.y_range = 6;
     
 
         bode_mag_canvas.draw = function() {
@@ -196,51 +192,8 @@
             }
         }
 
-        pz_canvas.draw = function() {
-            let ctx = pz_canvas.canvas.getContext("2d");
-            ctx.clearRect(0, 0, pz_canvas.width, pz_canvas.height);
-
-            let SIZE = 5;
-            ctx.lineWidth = 2;
-            ctx.lineCap = "round";
-
-            let all_poles = transfer_function.get_all_poles();
-            let all_zeros = transfer_function.get_all_zeros();
-
-            for (let i=0; i<all_poles.length; i++) {
-                let value = [all_poles[i].re, all_poles[i].im];
-                let pos = pz_canvas.value_to_position(value);
-                ctx.beginPath()
-                ctx.moveTo(pos[0] - SIZE, pos[1] - SIZE);
-                ctx.lineTo(pos[0] + SIZE, pos[1] + SIZE);
-                ctx.stroke()
-                ctx.beginPath()
-                ctx.moveTo(pos[0] + SIZE, pos[1] - SIZE);
-                ctx.lineTo(pos[0] - SIZE, pos[1] + SIZE);
-                ctx.stroke()
-            }
-            for (let i=0; i<all_zeros.length; i++) {
-                let value = [all_zeros[i].re, all_zeros[i].im];
-                let pos = pz_canvas.value_to_position(value);
-                ctx.beginPath();
-                ctx.arc(pos[0], pos[1], SIZE, 0, 2*math.pi);
-                ctx.stroke();
-            }
-            
-        }
-
-        pz_canvas.mouse_down_mid = function(e) {
-            let pos = [e.layerX, e.layerY];
-            let value = pz_canvas.position_to_value(pos);
-
-            transfer_function.add_double_pole(math.complex(value[0], value[1]));
-            transfer_function = transfer_function;
-            return true
-        }
-
         bode_mag_canvas.draw();
         bode_phase_canvas.draw();
-        pz_canvas.draw();
     })
 </script>
 
@@ -297,5 +250,5 @@
         <Graph bind:canvas={bode_phase_canvas} height={200} width={500}/>
     </div>
     <div style="width: 5mm"></div>
-    <Graph bind:canvas={pz_canvas} height={500} width={500}/>
+    <PZMap bind:transfer_function={transfer_function} height={500} width={500}/>
 </div>
