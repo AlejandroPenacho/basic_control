@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import * as math from "mathjs";
     import Graph from "./graph.svelte";
+    import Nyquist from "./nyquist.svelte";
 
     let my_num = 0;
     let side_gone = 0;
@@ -13,7 +14,6 @@
             this.zeros = [];
             this.double_poles = [];
             this.double_zeros = [];
-
         }
 
         add_pole(pole) {
@@ -65,10 +65,22 @@
                 let value = math.complex(1, 0);
 
                 for (let j=0; j < zeros.length; j++) {
-                    value = math.multiply(value, math.add(x, -zeros[j]));
+                    value = math.multiply(
+                        value,
+                        math.add(
+                            1,
+                            math.divide(x, zeros[j]).neg()
+                        )
+                    );
                 }
                 for (let j=0; j < poles.length; j++) {
-                    value = math.divide(value, math.add(x, poles[j].neg()));
+                    value = math.divide(
+                        value,
+                        math.add(
+                            1,
+                            math.divide(x, poles[j]).neg()
+                        )
+                    );
                 }
                 output.push(value)
             }
@@ -105,9 +117,6 @@
         nyquist_values = transfer_function.get_frequency_response(
             frequencies
         );
-        if (nyquist_canvas != undefined) {
-            nyquist_canvas.draw();
-        }
         if (bode_mag_canvas != undefined) {
             bode_mag_canvas.draw();
         }
@@ -119,7 +128,6 @@
         }
     }
 
-    let nyquist_canvas;
     let bode_mag_canvas;
     let bode_phase_canvas;
     let pz_canvas;
@@ -139,30 +147,8 @@
         pz_canvas.x_range = 6;
         pz_canvas.y_range = 6;
     
-        nyquist_canvas.draw = function() {
-            let ctx = nyquist_canvas.canvas.getContext("2d");
-            ctx.clearRect(0, 0, nyquist_canvas.width, nyquist_canvas.height);
-
-            let values = [];
-            for (let i=0; i<nyquist_values.length; i++) {
-                values.push([
-                    math.re(nyquist_values[i]),
-                    math.im(nyquist_values[i])
-                ])
-            }
-
-            let initial_point = nyquist_canvas.value_to_position(values[0]);
-            ctx.beginPath();
-            ctx.moveTo(initial_point[0], initial_point[1]);
-            for (let i=1; i<values.length; i++) {
-                let pos = nyquist_canvas.value_to_position(values[i]);
-                ctx.lineTo(pos[0], pos[1]);
-            }
-            ctx.stroke();
-        }
 
         bode_mag_canvas.draw = function() {
-            console.log("Whatever")
             let ctx = bode_mag_canvas.canvas.getContext("2d");
 
             ctx.clearRect(0, 0, bode_mag_canvas.width, bode_mag_canvas.height);
@@ -254,7 +240,6 @@
 
         bode_mag_canvas.draw();
         bode_phase_canvas.draw();
-        nyquist_canvas.draw();
         pz_canvas.draw();
     })
 </script>
@@ -299,8 +284,10 @@
     max="4"
 />
 
+{nyquist_values[2]}
+
 <div style="display: flex">
-    <Graph bind:canvas={nyquist_canvas} height={500} width={500}/>
+    <Nyquist bind:nyquist_values={nyquist_values} height={500} width={500}/>
     <div style="width: 5mm"></div>
     <div style="
         display: flex;
