@@ -55,6 +55,9 @@
     }
 
     canvas.mouse_up_action = (e) => {
+        // Maybe we click outside and release inside here
+        if (last_mouse_down_position == undefined) { return }
+
         if (e.layerX == last_mouse_down_position[0] && e.layerY == last_mouse_down_position[1]) {
           let value = canvas.position_to_value([e.layerX, e.layerY]);
           transfer_function.add_double_pole(math.complex(value[0], value[1]));

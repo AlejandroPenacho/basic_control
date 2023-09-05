@@ -4,6 +4,7 @@
     import Graph from "./graph.svelte";
     import Nyquist from "./nyquist.svelte";
     import PZMap from "./pz_map.svelte";
+    import Bode from "./bode.svelte";
 
     let my_num = 0;
     let side_gone = 0;
@@ -118,83 +119,7 @@
         nyquist_values = transfer_function.get_frequency_response(
             frequencies
         );
-        if (bode_mag_canvas != undefined) {
-            bode_mag_canvas.draw();
-        }
-        if (bode_phase_canvas != undefined) {
-            bode_phase_canvas.draw();
-        }
     }
-
-    let bode_mag_canvas;
-    let bode_phase_canvas;
-    let pz_canvas;
-
-
-    onMount(() => {
-        bode_mag_canvas.x_c = 1;
-        bode_mag_canvas.x_range = 8;
-        bode_mag_canvas.y_c = -1;
-        bode_mag_canvas.y_range = 8;
-
-        bode_phase_canvas.x_c = 1;
-        bode_phase_canvas.x_range = 8;
-        bode_phase_canvas.y_c = 0;
-        bode_phase_canvas.y_range = 360;
-
-    
-
-        bode_mag_canvas.draw = function() {
-            let ctx = bode_mag_canvas.canvas.getContext("2d");
-
-            ctx.clearRect(0, 0, bode_mag_canvas.width, bode_mag_canvas.height);
-            ctx.beginPath();
-
-            for (let i=0; i<frequencies.length; i++) {
-                let f = frequencies[i];
-                let mag = nyquist_values[i].toPolar().r;
-                let value = [
-                    math.log(f, 10),
-                    math.log(mag, 10)
-                ]
-
-                let position = bode_mag_canvas.value_to_position(value)
-                if (i==0) {
-                    ctx.moveTo(position[0], position[1]);
-                } else {
-                    ctx.lineTo(position[0], position[1]);
-                }
-                ctx.stroke();
-            }
-        }
-
-        bode_phase_canvas.draw = function() {
-            let ctx = bode_phase_canvas.canvas.getContext("2d");
-            ctx.clearRect(0, 0, bode_phase_canvas.width, bode_phase_canvas.height);
-
-            ctx.beginPath();
-
-            for (let i=0; i<frequencies.length; i++) {
-                let f = frequencies[i];
-                let angle = nyquist_values[i].toPolar().phi;
-                let value = [
-                    math.log(f, 10),
-                    angle * 180 / math.pi
-                ]
-
-                let position = bode_phase_canvas.value_to_position(value)
-                if (i==0) {
-                    ctx.moveTo(position[0], position[1]);
-                } else {
-                    ctx.lineTo(position[0], position[1]);
-                }
-                ctx.stroke();
-            }
-        }
-
-        bode_mag_canvas.draw();
-        bode_phase_canvas.draw();
-    })
 </script>
 
 <style>
@@ -242,13 +167,12 @@
 <div style="display: flex">
     <Nyquist bind:nyquist_values={nyquist_values} height={500} width={500}/>
     <div style="width: 5mm"></div>
-    <div style="
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between">
-        <Graph bind:canvas={bode_mag_canvas} height={200} width={500}/>
-        <Graph bind:canvas={bode_phase_canvas} height={200} width={500}/>
-    </div>
+    <Bode
+        bind:frequencies={frequencies}
+        bind:nyquist_values={nyquist_values}
+        height={500}
+        width={500}
+    />
     <div style="width: 5mm"></div>
     <PZMap bind:transfer_function={transfer_function} height={500} width={500}/>
 </div>

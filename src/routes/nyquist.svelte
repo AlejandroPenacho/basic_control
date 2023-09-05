@@ -10,6 +10,13 @@
   let canvas;
   export let nyquist_values;
 
+    $: {
+        nyquist_values = nyquist_values;
+        if (canvas != undefined) {
+            canvas.draw();
+        }
+    } 
+
   onMount(() => {
     canvas.draw = function() {
         let ctx = canvas.canvas.getContext("2d");
