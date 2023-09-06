@@ -36,7 +36,7 @@
 
 
     mag_canvas.draw = function() {
-      let ctx = mag_canvas.canvas.getContext("2d");
+      let ctx = mag_canvas.main_canvas.getContext("2d");
 
       ctx.clearRect(0, 0, mag_canvas.width, mag_canvas.height);
       ctx.beginPath();
@@ -60,7 +60,7 @@
     }
 
     phase_canvas.draw = function() {
-        let ctx = phase_canvas.canvas.getContext("2d");
+        let ctx = phase_canvas.main_canvas.getContext("2d");
         ctx.clearRect(0, 0, phase_canvas.width, phase_canvas.height);
 
         ctx.beginPath();
@@ -89,13 +89,26 @@
       phase_canvas.x_range = mag_canvas.x_range;
       phase_canvas.draw();
     }
+    mag_canvas.mouse_wheel_action = (e) => {
+      mag_canvas.mouse_wheel_event(e);
+      phase_canvas.x_c = mag_canvas.x_c;
+      phase_canvas.x_range = mag_canvas.x_range;
+      phase_canvas.draw();
+    }
 
     phase_canvas.mouse_move_action = (e) => {
       phase_canvas.mouse_move_event(e);
       mag_canvas.x_c = phase_canvas.x_c;
       mag_canvas.x_range = phase_canvas.x_range;
-      phase_canvas.draw();
+      mag_canvas.draw();
     }
+    phase_canvas.mouse_wheel_action = (e) => {
+      phase_canvas.mouse_wheel_event(e);
+      mag_canvas.x_c = phase_canvas.x_c;
+      mag_canvas.x_range = phase_canvas.x_range;
+      mag_canvas.draw();
+    }
+
 
     mag_canvas.draw();
     phase_canvas.draw();

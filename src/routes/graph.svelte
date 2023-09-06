@@ -20,7 +20,8 @@
       this.y_range = 4;
       this.width = width;
       this.height = height;
-      this.canvas = false;
+      this.main_canvas = false;
+      this.cursor_canvas = false;
 
       this.mouse_wheel_action = (e) => {
         this.mouse_wheel_event(e)
@@ -89,21 +90,49 @@
     }
 
     mouse_move_event(e) {
-      if (!mouse_is_down) { return }
-      let delta_x = e.clientX - last_mouse_pos[0];
-      let delta_y = e.clientY - last_mouse_pos[1];
+      if (mouse_is_down) {
+        let delta_x = e.clientX - last_mouse_pos[0];
+        let delta_y = e.clientY - last_mouse_pos[1];
 
-      last_mouse_pos = [e.clientX, e.clientY];
+        last_mouse_pos = [e.clientX, e.clientY];
 
-      this.x_c -= delta_x * this.x_range / this.width;
-      this.y_c += delta_y * this.y_range / this.height;
+        this.x_c -= delta_x * this.x_range / this.width;
+        this.y_c += delta_y * this.y_range / this.height;
 
-      this.draw();
+        this.draw();
+      }
+
+      // Improve performance by a 200% for free!!! Front-end
+      // "developers" hate him!!
+      requestAnimationFrame(() => {
+        let ctx = this.cursor_canvas.getContext("2d");
+        ctx.lineWidth = 0.2;
+        ctx.clearRect(0, 0, this.width, this.height);
+        ctx.beginPath()
+        ctx.moveTo(e.layerX, 0)
+        ctx.lineTo(e.layerX, this.height)
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(0, e.layerY)
+        ctx.lineTo(this.width, e.layerY)
+        ctx.stroke()
+
+        let value = this.position_to_value([e.layerX, e.layerY]);
+        ctx.font = "10px Arial";
+        ctx.fillText(
+          value[0].toFixed(2),
+          e.layerX + 10, this.height - 10,
+          // e.layerX, e.layerY,
+        )
+        ctx.fillText(
+          value[1].toFixed(2),
+          this.width - 50, e.layerY - 10
+        )
+      })
     }
   }
 
   export let canvas = new Canvas();
-
 
   function value_to_position(value, parameters) {
     let x_scale = parameters.width / parameters.x_range;
@@ -130,34 +159,6 @@
   let mouse_is_down = false;
   let last_mouse_pos = [0, 0];
 
-  /*
-  let test_points = [
-    [0, 0],
-    [1, 0.5],
-    [1, -1],
-    [-1, -1],
-    [-0.5, 1],
-    [-2, 2]
-  ]
-
-  function draw() {
-      let ctx = canvas.canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      let initial_point = canvas.value_to_position(
-        test_points[0]
-      );
-      ctx.moveTo(initial_point[0], initial_point[1]);
-      for (let i=1; i< test_points.length; i++) {
-        let norm_point = value_to_position(
-          test_points[i],
-          canvas
-        );
-        ctx.lineTo(norm_point[0], norm_point[1]);
-      }
-      ctx.stroke();
-  }
-  */
 
 </script>
 
@@ -165,12 +166,26 @@
     div#myCanvas {
         border: 1mm solid #100000;
         overflow: hidden;
+        position: relative;
     }
 </style>
 
-<div id="myCanvas">
+<div
+  id="myCanvas"
+  style="
+    width: {canvas.width}px;
+    height: {canvas.height}px;
+  "
+>
 <canvas
-    bind:this={canvas.canvas}
+    style="position: absolute; top: 0; left: 0"
+    bind:this={canvas.main_canvas}
+    width={canvas.width}
+    height={canvas.height}
+/>
+<canvas
+    style="position: absolute; top: 0; left: 0"
+    bind:this={canvas.cursor_canvas}
     on:wheel={canvas.mouse_wheel_action}
     on:mousedown={canvas.mouse_down_action}
     on:mouseout={canvas.mouse_up_action}

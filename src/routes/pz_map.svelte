@@ -17,7 +17,7 @@
     canvas.y_range = 6;
 
     canvas.draw = function() {
-        let ctx = canvas.canvas.getContext("2d");
+        let ctx = canvas.main_canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         let SIZE = 5;

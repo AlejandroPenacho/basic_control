@@ -19,7 +19,7 @@
 
   onMount(() => {
     canvas.draw = function() {
-        let ctx = canvas.canvas.getContext("2d");
+        let ctx = canvas.main_canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         let values = [];
