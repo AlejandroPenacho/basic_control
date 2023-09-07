@@ -23,6 +23,7 @@
       this.height = height;
       this.main_canvas = false;
       this.cursor_canvas = false;
+      this.cursor_position = undefined;
 
       this.mouse_wheel_action = (e) => {
         this.mouse_wheel_event(e)
@@ -93,7 +94,7 @@
 
     mouse_out_event(e) {
       mouse_is_down = false;
-      cursor_position = undefined;
+      this.cursor_position = undefined;
       this.draw_cursor();
     }
 
@@ -109,12 +110,12 @@
 
         this.draw();
       }
-      cursor_position = [e.layerX, e.layerY];
-      if (math.abs(cursor_position[0] - this.width/2) / this.width < 0.02) {
-        cursor_position[0] = this.width / 2;
+      this.cursor_position = [e.layerX, e.layerY];
+      if (math.abs(this.cursor_position[0] - this.width/2) / this.width < 0.02) {
+        this.cursor_position[0] = this.width / 2;
       }
-      if (math.abs(cursor_position[1] - this.height/2)/this.height < 0.02) {
-        cursor_position[1] = this.height / 2;
+      if (math.abs(this.cursor_position[1] - this.height/2)/this.height < 0.02) {
+        this.cursor_position[1] = this.height / 2;
       }
       this.draw_cursor();
     }
@@ -131,10 +132,10 @@
         ctx.lineWidth = 0.2;
         ctx.clearRect(0, 0, this.width, this.height);
 
-        if (cursor_position == undefined) { return }
+        if (this.cursor_position == undefined) { return }
 
-        let x = cursor_position[0];
-        let y = cursor_position[1];
+        let x = this.cursor_position[0];
+        let y = this.cursor_position[1];
 
         ctx.beginPath()
         ctx.moveTo(x, 0)
@@ -145,7 +146,7 @@
         ctx.lineTo(this.width, y)
         ctx.stroke()
 
-        let value = this.position_to_value(cursor_position);
+        let value = this.position_to_value(this.cursor_position);
         ctx.font = "10px Arial";
         ctx.fillText(
           value[0].toFixed(2),
@@ -188,7 +189,6 @@
   let mouse_is_down = false;
   let cursor_animation_request = undefined;
   let last_mouse_pos = [0, 0];
-  let cursor_position = undefined;
 
 
 </script>

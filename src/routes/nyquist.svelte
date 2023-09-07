@@ -10,11 +10,18 @@
   let canvas;
   export let nyquist_values;
 
-    $: {
-        nyquist_values = nyquist_values;
-        if (canvas != undefined) {
-            canvas.draw();
-        }
+  let x_array = new Array(nyquist_values.length)
+  let y_array = new Array(nyquist_values.length)
+
+   $: {
+      nyquist_values = nyquist_values;
+      for (let i=0; i<nyquist_values.length; i++) {
+        x_array[i] = nyquist_values[i].re;
+        y_array[i] = nyquist_values[i].im;
+      }
+      if (canvas != undefined) {
+        canvas.draw();
+      }
     } 
 
   onMount(() => {
@@ -22,21 +29,11 @@
         let ctx = canvas.main_canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let values = [];
-        for (let i=0; i<nyquist_values.length; i++) {
-            values.push([
-                math.re(nyquist_values[i]),
-                math.im(nyquist_values[i])
-            ])
-        }
-
-        if (values.length == 0) { return }
-
-        let initial_point = canvas.value_to_position(values[0]);
+        let initial_point = canvas.value_to_position([x_array[0], y_array[0]]);
         ctx.beginPath();
         ctx.moveTo(initial_point[0], initial_point[1]);
-        for (let i=1; i<values.length; i++) {
-            let pos = canvas.value_to_position(values[i]);
+        for (let i=1; i<x_array.length; i++) {
+            let pos = canvas.value_to_position([x_array[i], y_array[i]]);
             ctx.lineTo(pos[0], pos[1]);
         }
         ctx.stroke();

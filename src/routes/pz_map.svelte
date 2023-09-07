@@ -8,8 +8,17 @@
   export let width;
 
   let canvas;
+
+    let mode = "add_pole";
+
   export let transfer_function;
 
+    let all_poles = [];
+    let all_zeros = [];
+    $:{
+        all_poles = transfer_function.get_all_poles();
+        all_zeros = transfer_function.get_all_zeros();
+    }
   let last_mouse_down_position;
 
   onMount(() => {
@@ -77,16 +86,82 @@
         if (last_mouse_down_position == undefined) { return }
 
         if (e.layerX == last_mouse_down_position[0] && e.layerY == last_mouse_down_position[1]) {
-          let value = canvas.position_to_value([e.layerX, e.layerY]);
-          transfer_function.add_double_pole(math.complex(value[0], value[1]));
+          // Do not use the actual position, but the cursor one!!
+          // let value = canvas.position_to_value([e.layerX, e.layerY]);
+          let value = canvas.position_to_value(canvas.cursor_position);
+          console.log(value)
+
+          if (mode ==  "add_pole") {
+            if (value[1] == 0) {
+              transfer_function.add_pole(math.complex(value[0], 0));
+            } else {
+              transfer_function.add_double_pole(math.complex(value[0], math.abs(value[1])));
+            }
+          } else if (mode == "add_zero") {
+            if (value[1] == 0) {
+              transfer_function.add_zero(math.complex(value[0], 0));
+            } else {
+              transfer_function.add_double_zero(math.complex(value[0], math.abs(value[1])));
+            }
+          }
+
           transfer_function = transfer_function;
         }
         canvas.mouse_up_event(e);
         canvas.draw();
     }
 
+
+    canvas.mouse_move_action = (e) => {
+        canvas.mouse_move_event(e);
+        for (let i=0; i<all_poles.length; i++) {
+            let pos = canvas.value_to_position([all_poles[i][0].re, all_poles[i][0].im])
+            let dist = math.pow(
+                math.pow(e.layerX - pos[0], 2) + math.pow(e.layerY - pos[1], 2),
+                1/2
+            )
+            if (dist < 10) {
+                canvas.cursor_position = pos;
+                return
+            }
+        }
+        for (let i=0; i<all_zeros.length; i++) {
+            let pos = canvas.value_to_position([all_zeros[i][0].re, all_zeros[i][0].im])
+            let dist = math.pow(
+                math.pow(e.layerX - pos[0], 2) + math.pow(e.layerY - pos[1], 2),
+                1/2
+            )
+            if (dist < 10) {
+                canvas.cursor_position = pos;
+                return
+            }
+        }
+    }
+
     canvas.draw();
   })
 </script>
 
-<Graph bind:canvas={canvas} height={height} width={width}/>
+<style>
+    div.main_div {
+        display: flex;
+    }
+    div.command_panel {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<div class="main_div">
+    <Graph bind:canvas={canvas} height={height} width={width}/>
+    <div class="command_panel">
+        <label>
+            <input type="radio" bind:group={mode} value={"add_pole"} />
+            Add pole
+        </label>
+        <label>
+            <input type="radio" bind:group={mode} value={"add_zero"} />
+            Add zero
+        </label>
+    </div>
+</div>
