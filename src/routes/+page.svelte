@@ -19,17 +19,47 @@
         }
 
         add_pole(pole) {
-            this.poles.push(pole)
+            for (let i=0; i < this.poles.length; i++) {
+                if (pole.equals(this.poles[i][0])) {
+                    this.poles[i][1] += 1;
+                    return
+                }
+            }
+            this.poles.push([pole, 1])
         }
 
         add_zero(zero) {
-            this.zeros.push(zero)
+            for (let i=0; i < this.zeros.length; i++) {
+                if (zero.equals(this.zeros[i][0])) {
+                    this.zeros[i][1] += 1;
+                    return
+                }
+            }
+            this.zeros.push([zero, 1])
         }
         add_double_pole(double_pole) {
-            this.double_poles.push(double_pole)
+            if (double_pole.im < 0) {
+                console.log("Negative double pole!!!");
+            }
+            for (let i=0; i < this.double_poles.length; i++) {
+                if (double_pole.equals(this.double_poles[i][0])) {
+                    this.double_poles[i][1] += 1;
+                    return
+                }
+            }
+            this.double_poles.push([double_pole, 1])
         }
         add_double_zero(double_zero) {
-            this.double_zeros.push(double_zero)
+            if (double_zero.im < 0) {
+                console.log("Negative double zero!!!");
+            }
+            for (let i=0; i < this.double_zeros.length; i++) {
+                if (double_zero.equals(this.double_zeros[i][0])) {
+                    this.double_zeros[i][1] += 1;
+                    return
+                }
+            }
+            this.double_zeros.push([double_zero, 1])
         }
 
         get_all_poles() {
@@ -39,7 +69,9 @@
             }
             for (let i = 0; i < this.double_poles.length; i++) {
                 output.push(this.double_poles[i])
-                output.push(math.conj(this.double_poles[i]))
+                output.push(
+                    [math.conj(this.double_poles[i][0]), this.double_poles[i][1]]
+                )
             }
             return output
         }
@@ -51,7 +83,9 @@
             }
             for (let i = 0; i < this.double_zeros.length; i++) {
                 output.push(this.double_zeros[i])
-                output.push(math.conj(this.double_zeros[i]))
+                output.push(
+                    [math.conj(this.double_zeros[i][0]), this.double_zeros[i][1]]
+                )
             }
             return output
         }
@@ -69,18 +103,24 @@
                 for (let j=0; j < zeros.length; j++) {
                     value = math.multiply(
                         value,
-                        math.add(
-                            1,
-                            math.divide(x, zeros[j]).neg()
+                        math.pow(
+                            math.add(
+                                1,
+                                math.divide(x, zeros[j][0]).neg()
+                            ),
+                            zeros[j][1]
                         )
                     );
                 }
                 for (let j=0; j < poles.length; j++) {
                     value = math.divide(
                         value,
-                        math.add(
-                            1,
-                            math.divide(x, poles[j]).neg()
+                        math.pow(
+                            math.add(
+                                1,
+                                math.divide(x, poles[j][0]).neg()
+                            ),
+                            poles[j][1]
                         )
                     );
                 }
@@ -99,6 +139,7 @@
     ];
     let transfer_function = new TransferFunction();
 
+    transfer_function.add_pole(math.complex(-3))
     transfer_function.add_pole(math.complex(-3))
     transfer_function.add_pole(math.complex(-1))
     transfer_function.add_double_pole(math.complex(-1.5, 0.3))

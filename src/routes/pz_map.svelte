@@ -19,6 +19,7 @@
     canvas.draw = function() {
         let ctx = canvas.main_canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "10px Arial";
 
         let SIZE = 5;
         ctx.lineWidth = 2;
@@ -28,7 +29,8 @@
         let all_zeros = transfer_function.get_all_zeros();
 
         for (let i=0; i<all_poles.length; i++) {
-            let value = [all_poles[i].re, all_poles[i].im];
+            let value = [all_poles[i][0].re, all_poles[i][0].im];
+            let power = all_poles[i][1];
             let pos = canvas.value_to_position(value);
             ctx.beginPath()
             ctx.moveTo(pos[0] - SIZE, pos[1] - SIZE);
@@ -38,13 +40,29 @@
             ctx.moveTo(pos[0] + SIZE, pos[1] - SIZE);
             ctx.lineTo(pos[0] - SIZE, pos[1] + SIZE);
             ctx.stroke()
+            if (power > 1) {
+                ctx.fillText(
+                    power.toString(),
+                    pos[0] + SIZE + 2,
+                    pos[1] - SIZE - 2
+                )
+            }
         }
         for (let i=0; i<all_zeros.length; i++) {
-            let value = [all_zeros[i].re, all_zeros[i].im];
+            let value = [all_zeros[i][0].re, all_zeros[i][0].im];
+            let power = all_zeros[i][1];
+
             let pos = canvas.value_to_position(value);
             ctx.beginPath();
             ctx.arc(pos[0], pos[1], SIZE, 0, 2*math.pi);
             ctx.stroke();
+            if (power > 1) {
+                ctx.fillText(
+                    power.toString(),
+                    pos[0] + SIZE + 2,
+                    pos[1] - SIZE - 2
+                )
+            }
         }
       
     }
