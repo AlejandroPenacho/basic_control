@@ -12,8 +12,18 @@
   export let nyquist_values;
   export let frequencies;
 
+  let log_magnitude_array = new Array(nyquist_values.length);
+  let phase_array = new Array(nyquist_values.length);
+  let log_freq_array = new Array(frequencies.length)
+
     $: {
-        nyquist_values = nyquist_values;
+        for (let i=0; i<nyquist_values.length; i++) {
+          let polar = nyquist_values[i].toPolar();
+          log_magnitude_array[i] = math.log(polar.r, 10);
+          phase_array[i] = polar.phi * 180 / math.pi;
+          log_freq_array[i] = math.log(frequencies[i], 10);
+        }
+
         if (mag_canvas != undefined) {
             mag_canvas.draw();
         }
@@ -42,11 +52,11 @@
       ctx.beginPath();
 
       for (let i=0; i<frequencies.length; i++) {
-        let f = frequencies[i];
-        let mag = nyquist_values[i].toPolar().r;
+        let f = log_freq_array[i];
+        let mag = log_magnitude_array[i];
         let value = [
-            math.log(f, 10),
-            math.log(mag, 10)
+            f,
+            mag
         ]
 
         let position = mag_canvas.value_to_position(value)
@@ -66,11 +76,11 @@
         ctx.beginPath();
 
         for (let i=0; i<frequencies.length; i++) {
-            let f = frequencies[i];
-            let angle = nyquist_values[i].toPolar().phi;
+            let f = log_freq_array[i];
+            let phase = phase_array[i];
             let value = [
-                math.log(f, 10),
-                angle * 180 / math.pi
+                f,
+                phase
             ]
 
             let position = phase_canvas.value_to_position(value)
@@ -85,28 +95,40 @@
 
     mag_canvas.mouse_move_action = (e) => {
       mag_canvas.mouse_move_event(e);
-      phase_canvas.x_c = mag_canvas.x_c;
-      phase_canvas.x_range = mag_canvas.x_range;
-      phase_canvas.draw();
+
+      if ((phase_canvas.x_c != mag_canvas.x_c) || (phase_canvas.x_range != mag_canvas.x_range)) {
+        phase_canvas.x_c = mag_canvas.x_c;
+        phase_canvas.x_range = mag_canvas.x_range;
+        phase_canvas.draw();
+      }
     }
     mag_canvas.mouse_wheel_action = (e) => {
       mag_canvas.mouse_wheel_event(e);
-      phase_canvas.x_c = mag_canvas.x_c;
-      phase_canvas.x_range = mag_canvas.x_range;
-      phase_canvas.draw();
+
+      if ((phase_canvas.x_c != mag_canvas.x_c) || (phase_canvas.x_range != mag_canvas.x_range)) {
+        phase_canvas.x_c = mag_canvas.x_c;
+        phase_canvas.x_range = mag_canvas.x_range;
+        phase_canvas.draw();
+      }
     }
 
     phase_canvas.mouse_move_action = (e) => {
       phase_canvas.mouse_move_event(e);
-      mag_canvas.x_c = phase_canvas.x_c;
-      mag_canvas.x_range = phase_canvas.x_range;
-      mag_canvas.draw();
+
+      if ((phase_canvas.x_c != mag_canvas.x_c) || (phase_canvas.x_range != mag_canvas.x_range)) {
+        mag_canvas.x_c = phase_canvas.x_c;
+        mag_canvas.x_range = phase_canvas.x_range;
+        mag_canvas.draw();
+      }
     }
     phase_canvas.mouse_wheel_action = (e) => {
       phase_canvas.mouse_wheel_event(e);
-      mag_canvas.x_c = phase_canvas.x_c;
-      mag_canvas.x_range = phase_canvas.x_range;
-      mag_canvas.draw();
+
+      if ((phase_canvas.x_c != mag_canvas.x_c) || (phase_canvas.x_range != mag_canvas.x_range)) {
+        mag_canvas.x_c = phase_canvas.x_c;
+        mag_canvas.x_range = phase_canvas.x_range;
+        mag_canvas.draw();
+      }
     }
 
 

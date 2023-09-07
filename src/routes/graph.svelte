@@ -1,6 +1,7 @@
 
 <script>
   import { onMount } from "svelte";
+  import * as math from "mathjs";
 
   // What goes here...
   // We must provide:
@@ -29,6 +30,7 @@
       this.mouse_up_action = (e) => { this.mouse_up_event(e) }
       this.mouse_down_action = (e) => { this.mouse_down_event(e) }
       this.mouse_move_action = (e) => { this.mouse_move_event(e) }
+      this.mouse_out_action = (e) => { this.mouse_out_event(e) }
       this.draw = (e) => {}
     }
 
@@ -89,6 +91,12 @@
       mouse_is_down = false
     }
 
+    mouse_out_event(e) {
+      mouse_is_down = false;
+      cursor_position = undefined;
+      this.draw_cursor();
+    }
+
     mouse_move_event(e) {
       if (mouse_is_down) {
         let delta_x = e.clientX - last_mouse_pos[0];
@@ -101,34 +109,55 @@
 
         this.draw();
       }
+      cursor_position = [e.layerX, e.layerY];
+      if (math.abs(cursor_position[0] - this.width/2) / this.width < 0.02) {
+        cursor_position[0] = this.width / 2;
+      }
+      if (math.abs(cursor_position[1] - this.height/2)/this.height < 0.02) {
+        cursor_position[1] = this.height / 2;
+      }
+      this.draw_cursor();
+    }
 
+    draw_cursor() {
       // Improve performance by a 200% for free!!! Front-end
       // "developers" hate him!!
-      requestAnimationFrame(() => {
+      if (cursor_animation_request != undefined) {
+        cancelAnimationFrame(cursor_animation_request);
+        cursor_animation_request = undefined;
+      }
+      cursor_animation_request = requestAnimationFrame(() => {
         let ctx = this.cursor_canvas.getContext("2d");
         ctx.lineWidth = 0.2;
         ctx.clearRect(0, 0, this.width, this.height);
+
+        if (cursor_position == undefined) { return }
+
+        let x = cursor_position[0];
+        let y = cursor_position[1];
+
         ctx.beginPath()
-        ctx.moveTo(e.layerX, 0)
-        ctx.lineTo(e.layerX, this.height)
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, this.height)
         ctx.stroke()
         ctx.beginPath()
-        ctx.moveTo(0, e.layerY)
-        ctx.lineTo(this.width, e.layerY)
+        ctx.moveTo(0, y)
+        ctx.lineTo(this.width, y)
         ctx.stroke()
 
-        let value = this.position_to_value([e.layerX, e.layerY]);
+        let value = this.position_to_value(cursor_position);
         ctx.font = "10px Arial";
         ctx.fillText(
           value[0].toFixed(2),
-          e.layerX + 10, this.height - 10,
-          // e.layerX, e.layerY,
+          x + 10, this.height - 10,
+          // x, y,
         )
         ctx.fillText(
           value[1].toFixed(2),
-          this.width - 50, e.layerY - 10
+          this.width - 50, y - 10
         )
       })
+      
     }
   }
 
@@ -157,7 +186,9 @@
   }
 
   let mouse_is_down = false;
+  let cursor_animation_request = undefined;
   let last_mouse_pos = [0, 0];
+  let cursor_position = undefined;
 
 
 </script>
@@ -188,8 +219,8 @@
     bind:this={canvas.cursor_canvas}
     on:wheel={canvas.mouse_wheel_action}
     on:mousedown={canvas.mouse_down_action}
-    on:mouseout={canvas.mouse_up_action}
-    on:blur={canvas.mouse_up_action}
+    on:mouseout={canvas.mouse_out_action}
+    on:blur={canvas.mouse_out_action}
     on:mouseup={canvas.mouse_up_action}
     on:mousemove={canvas.mouse_move_action}
     width={canvas.width}
