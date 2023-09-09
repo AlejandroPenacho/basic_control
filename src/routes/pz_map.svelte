@@ -3,6 +3,9 @@
   import { onMount } from "svelte";
   import * as math from "mathjs";
 
+    // How to deal with the selection of poles/zeros/double poles/double zeros?
+    // That is going to take some time, maybe?
+
 
   export let height;
   export let width;
@@ -73,7 +76,7 @@
                 )
             }
         }
-      
+      canvas.draw_grid();
     }
 
     canvas.mouse_down_action = (e) => {
@@ -89,7 +92,6 @@
           // Do not use the actual position, but the cursor one!!
           // let value = canvas.position_to_value([e.layerX, e.layerY]);
           let value = canvas.position_to_value(canvas.cursor_position);
-          console.log(value)
 
           if (mode ==  "add_pole") {
             if (value[1] == 0) {

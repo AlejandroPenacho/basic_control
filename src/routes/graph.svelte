@@ -25,6 +25,9 @@
       this.cursor_canvas = false;
       this.cursor_position = undefined;
 
+      this.sticky_x_values = [0];
+      this.sticky_y_values = [0];
+
       this.mouse_wheel_action = (e) => {
         this.mouse_wheel_event(e)
       }
@@ -99,6 +102,7 @@
     }
 
     mouse_move_event(e) {
+      // Deal with the drag of the graph
       if (mouse_is_down) {
         let delta_x = e.clientX - last_mouse_pos[0];
         let delta_y = e.clientY - last_mouse_pos[1];
@@ -110,14 +114,48 @@
 
         this.draw();
       }
+
+
+      // Deal with the cursor movement
       this.cursor_position = [e.layerX, e.layerY];
-      if (math.abs(this.cursor_position[0] - this.width/2) / this.width < 0.02) {
-        this.cursor_position[0] = this.width / 2;
+      
+      for (let i = 0; i<this.sticky_x_values.length; i++) {
+        let pos_x = this.value_to_position([this.sticky_x_values[i], 0])[0];
+        if (math.abs(this.cursor_position[0] - pos_x) / this.width < 0.02) {
+          this.cursor_position[0] = pos_x;
+        }
       }
-      if (math.abs(this.cursor_position[1] - this.height/2)/this.height < 0.02) {
-        this.cursor_position[1] = this.height / 2;
+
+      for (let i = 0; i<this.sticky_y_values.length; i++) {
+        let pos_y = this.value_to_position([this.sticky_x_values[i], 0])[1];
+        if (math.abs(this.cursor_position[1] - pos_y)/this.height < 0.02) {
+          this.cursor_position[1] = pos_y;
+        }
       }
+
       this.draw_cursor();
+    }
+
+    draw_grid() {
+      let ctx = this.main_canvas.getContext("2d");
+      ctx.setLineDash([2, 2]);
+      ctx.lineWidth = 0.3;
+
+      for (let i = 0; i<this.sticky_x_values.length; i++) {
+        let pos_x = this.value_to_position([this.sticky_x_values[i], 0])[0];
+        ctx.beginPath();
+        ctx.moveTo(pos_x, 0)
+        ctx.lineTo(pos_x, this.height)
+        ctx.stroke();
+      }
+
+      for (let i = 0; i<this.sticky_y_values.length; i++) {
+        let pos_y = this.value_to_position([this.sticky_x_values[i], 0])[1];
+        ctx.beginPath();
+        ctx.moveTo(0, pos_y)
+        ctx.lineTo(this.width, pos_y)
+        ctx.stroke();
+      }
     }
 
     draw_cursor() {
