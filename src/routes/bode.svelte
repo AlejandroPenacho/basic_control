@@ -49,6 +49,8 @@
       let ctx = mag_canvas.main_canvas.getContext("2d");
 
       ctx.clearRect(0, 0, mag_canvas.width, mag_canvas.height);
+      ctx.setLineDash([]);
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
 
       for (let i=0; i<frequencies.length; i++) {
@@ -67,11 +69,14 @@
         }
         ctx.stroke();
       }
+      mag_canvas.draw_grid();
     }
 
     phase_canvas.draw = function() {
         let ctx = phase_canvas.main_canvas.getContext("2d");
         ctx.clearRect(0, 0, phase_canvas.width, phase_canvas.height);
+        ctx.setLineDash([]);
+        ctx.lineWidth = 1.5;
 
         ctx.beginPath();
 
@@ -91,6 +96,7 @@
             }
             ctx.stroke();
         }
+        phase_canvas.draw_grid();
     }
 
     mag_canvas.mouse_move_action = (e) => {
