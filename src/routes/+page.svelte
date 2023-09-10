@@ -90,6 +90,50 @@
             return output
         }
 
+        identify_singularity(val) {
+            let value = math.complex(val[0], math.abs(val[1]));
+
+            if (value.im == 0) {
+                for (let i=0; i<this.zeros.length; i++) {
+                    if (value.equals(this.zeros[i][0])) {
+                        return ["zero", i]
+                    }
+                }
+                for (let i=0; i<this.poles.length; i++) {
+                    if (value.equals(this.poles[i][0])) {
+                        return ["pole", i]
+                    }
+                }
+            }
+
+            for (let i=0; i<this.double_zeros.length; i++) {
+                if (value.equals(this.double_zeros[i][0])) {
+                    return ["double_zero", i]
+                }
+            }
+            for (let i=0; i<this.double_poles.length; i++) {
+                if (value.equals(this.double_poles[i][0])) {
+                    return ["double_pole", i]
+                }
+            }
+            return undefined
+        }
+
+        remove_element(element) {
+            let type = element[0];
+            let index = element[1];
+
+            if (type == "pole") {
+                this.poles.splice(index, 1);
+            } else if (type == "zero") {
+                this.zeros.splice(index, 1);
+            } else if (type == "double_pole") {
+                this.double_poles.splice(index, 1);
+            } else if (type == "double_zero") {
+                this.double_zeros.splice(index, 1);
+            }
+        }
+
         get_frequency_response(frequencies) {
             let poles = this.get_all_poles();
             let zeros = this.get_all_zeros();

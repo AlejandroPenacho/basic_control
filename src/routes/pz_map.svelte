@@ -23,6 +23,7 @@
         all_zeros = transfer_function.get_all_zeros();
     }
   let last_mouse_down_position;
+  let selected_singularity = undefined;
 
   onMount(() => {
     canvas.x_range = 6;
@@ -81,6 +82,8 @@
 
     canvas.mouse_down_action = (e) => {
         last_mouse_down_position = [e.layerX, e.layerY];
+        let value = canvas.position_to_value(canvas.cursor_position);
+
         canvas.mouse_down_event(e);
     }
 
@@ -105,6 +108,10 @@
             } else {
               transfer_function.add_double_zero(math.complex(value[0], math.abs(value[1])));
             }
+          } else if (mode == "delete") {
+            if (selected_singularity != undefined) {
+              transfer_function.remove_element(selected_singularity);
+            }
           }
 
           transfer_function = transfer_function;
@@ -124,6 +131,10 @@
             )
             if (dist < 10) {
                 canvas.cursor_position = pos;
+                selected_singularity = transfer_function.identify_singularity([
+                    all_poles[i][0].re,
+                    all_poles[i][0].im,
+                ])
                 return
             }
         }
@@ -135,6 +146,10 @@
             )
             if (dist < 10) {
                 canvas.cursor_position = pos;
+                selected_singularity = transfer_function.identify_singularity([
+                    all_zeros[i][0].re,
+                    all_zeros[i][0].im,
+                ])
                 return
             }
         }
@@ -164,6 +179,14 @@
         <label>
             <input type="radio" bind:group={mode} value={"add_zero"} />
             Add zero
+        </label>
+        <label>
+            <input type="radio" bind:group={mode} value={"delete"} />
+            Remove element
+        </label>
+        <label>
+            <input type="radio" bind:group={mode} value={"move"} />
+            Move
         </label>
     </div>
 </div>
